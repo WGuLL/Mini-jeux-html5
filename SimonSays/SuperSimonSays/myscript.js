@@ -319,7 +319,7 @@
 	}
 	function upRouge()
 	{
-		if(playerInputEnabled){
+		if(playerInputEnabled && rougeIsActive){
 		//feedback visuel du relachement
 			rouge.toggleClass('buttonRedActive');
 			rouge.toggleClass('buttonRedInactive');
@@ -330,7 +330,7 @@
 	}
 	function upBleu()
 	{
-		if(playerInputEnabled){
+		if(playerInputEnabled && bleuIsActive){
 		//feedback visuel du relachement
 			bleu.toggleClass('buttonBlueActive');
 			bleu.toggleClass('buttonBlueInactive');
@@ -341,7 +341,7 @@
 	}
 	function upVert()
 	{
-		if(playerInputEnabled){
+		if(playerInputEnabled && vertIsActive){
 		//feedback visuel du relachement
 			vert.toggleClass('buttonGreenActive');
 			vert.toggleClass('buttonGreenInactive');
@@ -352,7 +352,7 @@
 	}
 	function upJaune()
 	{
-		if(playerInputEnabled){
+		if(playerInputEnabled && jauneIsActive){
 		//feedback visuel du relachement
 			jaune.toggleClass('buttonYellowActive');
 			jaune.toggleClass('buttonYellowInactive');
