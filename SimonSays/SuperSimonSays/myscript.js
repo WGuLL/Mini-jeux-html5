@@ -225,6 +225,8 @@
 				playerInputEnabled = false;
 				//on continue la partie
 				indexSequenceJoueur = 0;
+				//on calcule à quelle vitesse la sequence va etre moontrée à l'utilisateur
+				showTime = Math.floor((Math.random() * 150)+150);
 				addElementInSequence();
 				window.setTimeout("showSequence()",1000);
 			}
@@ -237,6 +239,9 @@
 		else
 		{//sinon
 		//feedback audio de l'erreur
+		
+			//on bloque les inputs
+			playerInputEnabled = false;
 			mistakeSound.play();
 			//on diminue les vies
 			--healthPoints;
