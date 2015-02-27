@@ -1,0 +1,179 @@
+<!doctype html> 
+<html lang="en"> 
+<head> 
+	<meta charset="UTF-8" />
+	<title>Phaser - Making your first game, part 1</title>
+	<script type="text/javascript" src="js/phaser.min.js"></script>
+    <style type="text/css">
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+<script type="text/javascript">
+
+// Creation du jeu (width, height, rendering context, id of the DOM)
+var game = new Phaser.Game(800, 600, Phaser.AUTO, '', { preload: preload, create: create, update: update });
+// Variable pour récupérer la saisie clavier
+var cursors;
+//Vairables pour le score
+var score = 0;
+var scoreText;
+
+//Chargement des ressources
+function preload() {
+	//Ciel
+	game.load.image('sky', 'assets/sky.png');
+	//Sol
+    game.load.image('ground', 'assets/platform.png');
+    //Etoile
+    game.load.image('star', 'assets/star.png');
+    //Sprite Avatar
+    game.load.spritesheet('dude', 'assets/dude.png', 32, 48);
+}
+
+//Fonction servant à l'instanciation 
+function create() {
+
+	//¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ - DECOR
+
+	 //  Activation de la physique avec : Arcade Physics system
+    game.physics.startSystem(Phaser.Physics.ARCADE);
+ 
+    //  Background
+    game.add.sprite(0, 0, 'sky');
+ 
+    //  On créé le groupe "platforms" qui contiendra le sol et 2 plateformes sur lequel on pourra sauter
+    platforms = game.add.group();
+ 
+    //  On active la physique pour tout les objets créé dans ce groupe
+    platforms.enableBody = true;
+ 
+    // On créé le sol
+    var ground = platforms.create(0,game.world.height - 64, 'ground');
+ 
+    //  On le scale à la bonne taille (the original sprite is 400x32 in size)
+    ground.scale.setTo(2, 2);
+ 
+    //  Evite que la plateforme/sol tombe quand on saute dessus.
+    ground.body.immovable = true;
+ 
+    // On créé les deux plateformes
+    var ledge = platforms.create(400, 400, 'ground');
+    ledge.body.immovable = true;
+ 
+    ledge = platforms.create(-150, 250, 'ground');
+    ledge.body.immovable = true;
+
+
+	//¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ - JOUEUR
+
+   // Création de la sprite joueur avec ses parametres de position initiale
+    player = game.add.sprite(32, game.world.height - 150, 'dude');
+ 
+    //  On active la physique sur le joueur
+    game.physics.arcade.enable(player);
+ 
+    //  Propriétés physiques du joueur. Give the little guy a slight bounce.
+    player.body.bounce.y = 0.2;
+    player.body.gravity.y = 300;
+    player.body.collideWorldBounds = true;
+ 
+    //  Les différentes images de la sprite associée aux directions gauche et droite
+    player.animations.add('left', [0, 1, 2, 3], 10, true);
+    player.animations.add('right', [5, 6, 7, 8], 10, true);
+
+
+	//¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ - ETOILES
+
+	//Création du groupe "stars"
+    stars = game.add.group();
+    stars.enableBody = true;
+ 
+    //  On créé 12 étoiles
+    for (var i = 0; i < 12; i++)
+    {
+        //  On les créé dans le groupe "stars"
+        var star = stars.create(i * 70, 0, 'star');
+ 
+        //  On leur applique un poids
+        star.body.gravity.y = 100;
+ 
+        //  Application d'une variable de rebond alétoire
+        star.body.bounce.y = 0.7 + Math.random() * 0.2;
+    }
+
+
+	//¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ - AUTRES
+
+    	//Récupère la saisie clavier
+	cursors = game.input.keyboard.createCursorKeys();
+	
+	//Ajout du texte de score (posX, posY, defaultString, {})
+	scoreText = game.add.text(16, 16, 'score: 0', { fontSize: '32px', fill: '#000' });
+
+}
+
+//Fonction appelée en continu
+function update() {
+
+	//  Gère les collisions entre le sprite "player" et le groupe "platforms"
+    game.physics.arcade.collide(player, platforms);
+	//  Gère les collisions entre les groupes "stars" et "platforms"
+    game.physics.arcade.collide(stars, platforms);
+    //Lorsque que le player rentre en contact avec le groupe "stars" on éxécute la fontion "collecStar"
+	game.physics.arcade.overlap(player, stars, collectStar, null, this);
+
+
+	//¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ - DEPLACEMENTS
+
+    //  Réinitialise la vitesse du joueur à 0
+    player.body.velocity.x = 0;
+ 
+    if (cursors.left.isDown)
+    {
+        //  Mouvement à gauche
+        player.body.velocity.x = -150;
+ 		//Défilement de la sprite
+        player.animations.play('left');
+    }
+    else if (cursors.right.isDown)
+    {
+        //  Mouvement à droite
+        player.body.velocity.x = 150;
+  		//Défilement de la sprite
+        player.animations.play('right');
+    }
+    else
+    {
+        //  Pose de face
+        player.animations.stop();
+  		//Image 4 de la sprite
+        player.frame = 4;
+    }
+    
+    //  Permet au joueur de sauter s'il touche le sol
+    if (cursors.up.isDown && player.body.touching.down)
+    {
+        player.body.velocity.y = -350;
+    }
+
+}
+
+function collectStar (player, star) {
+    
+    // Removes the star from the screen
+    star.kill();
+
+    //  Ecriture du score
+    score += 10;
+    scoreText.text = 'Score: ' + score;
+}
+
+
+</script>
+
+</body>
+</html>
