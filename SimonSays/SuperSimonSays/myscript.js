@@ -402,3 +402,45 @@
 			jauneIsActive = false;
 		}
 	}
+	
+	//raccourcis claviers
+	
+	$(document).keyup(function(e)
+	{
+		if(e.which == 65 || e.keyCode == 65)
+		{
+			upRouge();
+		}
+		else if(e.which == 90 || e.keyCode == 90)
+		{
+			upVert();
+		}
+		else if(e.which == 69 || e.keyCode == 69)
+		{
+			upBleu();
+		}
+		else if(e.which == 82 || e.keyCode == 82)
+		{
+			upJaune();
+		}
+	});
+	
+	$(document).keydown(function(e)
+	{
+		if(e.which == 65 || e.keyCode == 65)
+		{
+			clickRouge();
+		}
+		else if(e.which == 90 || e.keyCode == 90)
+		{
+			clickVert();
+		}
+		else if(e.which == 69 || e.keyCode == 69)
+		{
+			clickBleu();
+		}
+		else if(e.which == 82 || e.keyCode == 82)
+		{
+			clickJaune();
+		}
+	});
