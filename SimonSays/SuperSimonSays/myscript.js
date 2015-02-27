@@ -288,7 +288,7 @@
 	//click couleurs
 	function clickRouge()
 	{
-		if(playerInputEnabled){
+		if(playerInputEnabled && !rougeIsActive){
 		//feedback visuel du click
 			rouge.toggleClass('buttonRedActive');
 			rouge.toggleClass('buttonRedInactive');
@@ -297,7 +297,7 @@
 	}
 	function clickBleu()
 	{
-		if(playerInputEnabled){
+		if(playerInputEnabled && !bleuIsActive){
 		//feedback visuel du click
 			bleu.toggleClass('buttonBlueActive');
 			bleu.toggleClass('buttonBlueInactive');
@@ -306,7 +306,7 @@
 	}
 	function clickVert()
 	{
-		if(playerInputEnabled){
+		if(playerInputEnabled && !vertIsActive){
 		//feedback visuel du click
 			vert.toggleClass('buttonGreenActive');
 			vert.toggleClass('buttonGreenInactive');
@@ -315,7 +315,7 @@
 	}
 	function clickJaune()
 	{
-		if(playerInputEnabled){
+		if(playerInputEnabled && !jauneIsActive){
 		//feedback visuel du click
 			jaune.toggleClass('buttonYellowActive');
 			jaune.toggleClass('buttonYellowInactive');
