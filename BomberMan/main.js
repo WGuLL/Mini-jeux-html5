@@ -112,6 +112,12 @@ gameState.main.prototype = {
 		explosions.forEach(function(item){
 			 item.animations.add("kaboom");
 		});
+		//text
+		this.ScoreA = 0;
+		this.ScoreB = 0;
+		this.ScoreText = "Score " + this.ScoreA+ " - " + this.ScoreB;
+		this.style = { font: "35px Calibri", fill: "#ff2200", align: "left"};
+		this.scoreText = game.add.text(game.world.centerX-100, 3, this.ScoreText, this.style);
 	},
 
 	//Fonction exécutée en continu
@@ -226,7 +232,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x - 55,bomb.y);
-			explosion.animations.play('kaboom',10,true);
+			explosion.animations.play('kaboom',10,false);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -234,7 +240,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x - 110,bomb.y);
-			explosion.animations.play('kaboom',10,true);
+			explosion.animations.play('kaboom',10,false);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -243,7 +249,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x + 55,bomb.y);
-			explosion.animations.play('kaboom',10,true);
+			explosion.animations.play('kaboom',10,false);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -251,7 +257,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x + 110,bomb.y);
-			explosion.animations.play('kaboom',10,true);
+			explosion.animations.play('kaboom',10,false);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -260,7 +266,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y - 55);
-			explosion.animations.play('kaboom',10,true);
+			explosion.animations.play('kaboom',10,false);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -268,7 +274,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y - 110);
-			explosion.animations.play('kaboom',10,true);
+			explosion.animations.play('kaboom',10,false);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}		
@@ -277,7 +283,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y + 55);
-			explosion.animations.play('kaboom',10,true);
+			explosion.animations.play('kaboom',10,false);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -285,7 +291,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y + 110);
-			explosion.animations.play('kaboom',10,true);
+			explosion.animations.play('kaboom',10,false);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -297,17 +303,31 @@ gameState.main.prototype = {
 	},
 	CheckForPlayerDeath : function(explosion)
 	{
+		var kills = false;
 		var explodePlacementX = Math.abs(explosion.x - this.bomberA.x);
 		var explodePlacementY = Math.abs(explosion.y - this.bomberA.y);
 		if(explodePlacementX<45 && explodePlacementY<45)
 		{
-			console.log("le joueur A a perdu");
+			kills = true;
+			++this.ScoreB;
+			console.log("le joueur A a perdu"+ this.ScoreB);
 		}
 		var explodePlacementX = Math.abs(explosion.x - this.bomberB.x);
 		var explodePlacementY = Math.abs(explosion.y - this.bomberB.y);
 		if(explodePlacementX<45 && explodePlacementY<45)
 		{
-			console.log("le joueur B a perdu");
+			kills = true;
+			++this.ScoreA;
+			console.log("le joueur B a perdu" + this.ScoreA);
+		}
+		if(kills)
+		{
+			this.bomberA.x = 100;
+			this.bomberA.y = game.height/2;
+			this.bomberB.x = game.width - 100;
+			this.bomberB.y = game.height/2;
+			this.ScoreText = "Score " + this.ScoreA+ " - " + this.ScoreB;
+			this.scoreText.setText(this.ScoreText);
 		}
 	}
 };
