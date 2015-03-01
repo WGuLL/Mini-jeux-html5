@@ -1,4 +1,3 @@
-
 // Variables qui nous permettront de savoir quand le jeu démarre ou quand il y a un GAME OVER
 var GAME_START = false;
 var GAME_OVER = false;
@@ -27,8 +26,10 @@ gameState.load.prototype = {
 	// Chargement des ressources
 		// Chargement de l'image du background
 		game.load.image('background', 'img/BomberMap.jpg');
-		//Chargement du personnage
-		game.load.spritesheet('bomber', 'img/player.png', 62, 64);
+		//Chargement du personnage A
+		game.load.spritesheet('bomberA', 'img/playerA.png', 62, 64);
+		//Chargement du personnage B
+		game.load.spritesheet('bomberB', 'img/playerB.png', 62, 64);
 		//Chargement des bombes
 		game.load.image('bomb', 'img/Bomb.png');
 		//Chargement des explosions
@@ -43,7 +44,6 @@ gameState.load.prototype = {
 
 // Va contenir le coeur du jeu ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ - GAME
 gameState.main.prototype = {
-
 	create: function() {
 		// Redimensionne le jeu se redimensionne selon la taille de l'écran (Pour les PC)
 		//PROBLEME AVEC LA DERNIERE VERSION DE PHASER.MIN.JS
@@ -61,21 +61,39 @@ gameState.main.prototype = {
 		// Création de l'arrière-plan dans le Canvas
 		game.background = game.add.tileSprite(0, 0, game.width, game.height, 'background');
 
-		// ---- BOMBER
-    	this.bomberA = game.add.sprite(100,game.height/2, 'bomber');
+		// ---- BOMBER A
+    	this.bomberA = game.add.sprite(100,game.height/2, 'bomberA');
     	this.bomberA.anchor.setTo(0.5, 0.5);
     	game.physics.arcade.enable(this.bomberA);
     	this.bomberA.body.collideWorldBounds = true;
-		
 		//  Les différentes images de la sprite associée aux directions gauche et droite
 		this.bomberA.animations.add('down', [0, 1, 2, 3], 10, true);
 		this.bomberA.animations.add('left', [4, 5, 6, 7], 10, true);
 		this.bomberA.animations.add('right', [8, 9, 10, 11], 10, true);
 		this.bomberA.animations.add('up', [12, 13, 14, 15], 10, true);
+		
+		// ---- BOMBER B
+    	this.bomberB = game.add.sprite(game.width - 100,game.height/2, 'bomberB');
+    	this.bomberB.anchor.setTo(0.5, 0.5);
+    	game.physics.arcade.enable(this.bomberB);
+    	this.bomberB.body.collideWorldBounds = true;
+		//  Les différentes images de la sprite associée aux directions gauche et droite
+		this.bomberB.animations.add('down', [0, 1, 2, 3], 10, true);
+		this.bomberB.animations.add('left', [4, 5, 6, 7], 10, true);
+		this.bomberB.animations.add('right', [8, 9, 10, 11], 10, true);
+		this.bomberB.animations.add('up', [12, 13, 14, 15], 10, true);
+		
 
     	//  And some controls to play the game with
-    	cursors = game.input.keyboard.createCursorKeys();
-    	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
+    	cursorsA = game.input.keyboard.createCursorKeys();
+		cursorsB = {
+			up: game.input.keyboard.addKey(Phaser.Keyboard.Z),
+			down: game.input.keyboard.addKey(Phaser.Keyboard.S),
+			left: game.input.keyboard.addKey(Phaser.Keyboard.Q),
+			right: game.input.keyboard.addKey(Phaser.Keyboard.D),
+		};
+    	fireButtonA = game.input.keyboard.addKey(Phaser.Keyboard.M);
+    	fireButtonB = game.input.keyboard.addKey(Phaser.Keyboard.A);
 
     	// ---- BOMB
     	bombAs = game.add.group();
@@ -96,28 +114,29 @@ gameState.main.prototype = {
 
 	//Fonction exécutée en continu
 	update: function() {
+	//BOMBER A
         //Vitesse nulle en attente de commande
         this.bomberA.body.velocity.setTo(0, 0);
         //Fleche gauche
-        if (cursors.left.isDown)
+        if (cursorsA.left.isDown)
         {
            	this.bomberA.body.velocity.x = -200;
 			this.bomberA.animations.play('left');
         }
         //Fleche droite
-	    else if (cursors.right.isDown)
+	    else if (cursorsA.right.isDown)
     	{
             this.bomberA.body.velocity.x = 200;
 			this.bomberA.animations.play('right');
         }
         //Fleche haute
-        else if (cursors.up.isDown)
+        else if (cursorsA.up.isDown)
         {
            	this.bomberA.body.velocity.y = -200;
 			this.bomberA.animations.play('up');
         }
         //Fleche bas
-	    else if (cursors.down.isDown)
+	    else if (cursorsA.down.isDown)
     	{
             this.bomberA.body.velocity.y = 200;
 			this.bomberA.animations.play('down');
@@ -130,14 +149,52 @@ gameState.main.prototype = {
 			this.bomberA.frame = 0;
 		}
         //  bombing?
-        if (fireButton.isDown)
+        if (fireButtonA.isDown)
         {
-	        this.BombingA();
+	        this.BombingA(this.bomberA);
+    	}
+	//BOMBER B
+        //Vitesse nulle en attente de commande
+        this.bomberB.body.velocity.setTo(0, 0);
+        //Fleche gauche
+        if (cursorsB.left.isDown)
+        {
+           	this.bomberB.body.velocity.x = -200;
+			this.bomberB.animations.play('left');
+        }
+        //Fleche droite
+	    else if (cursorsB.right.isDown)
+    	{
+            this.bomberB.body.velocity.x = 200;
+			this.bomberB.animations.play('right');
+        }
+        //Fleche haute
+        else if (cursorsB.up.isDown)
+        {
+           	this.bomberB.body.velocity.y = -200;
+			this.bomberB.animations.play('up');
+        }
+        //Fleche bas
+	    else if (cursorsB.down.isDown)
+    	{
+            this.bomberB.body.velocity.y = 200;
+			this.bomberB.animations.play('down');
+        }
+		else
+		{
+			//  Pose de face
+			this.bomberB.animations.stop();
+			//Image 4 de la sprite
+			this.bomberB.frame = 0;
+		}
+        //  bombing?
+        if (fireButtonB.isDown)
+        {
+	        this.BombingA(this.bomberB);
     	}
 	},
 
-    BombingA: function () {
-
+    BombingA: function (bomber) {
     	//  To avoid them being allowed to fire too fast we set a time limit
    		if (game.time.now > fireRate)
     	{
@@ -147,7 +204,7 @@ gameState.main.prototype = {
         	if (bombA)
         	{
             	//  And fire it
-            	bombA.reset(this.bomberA.x, this.bomberA.y + 45);
+            	bombA.reset(bomber.x, bomber.y + 45);
             	fireRate = game.time.now + 1000;
 				game.time.events.add(Phaser.Timer.SECOND * 4, this.Explodes, this, bombA);
         	}
@@ -160,73 +217,99 @@ gameState.main.prototype = {
 			explosion.reset(bomb.x,bomb.y);
 			explosion.animations.play('explodes',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
+			this.CheckForPlayerDeath(explosion);
 		}
 		//detonation droite
 		explosion = explosions.getFirstExists(false);
 		if(explosion)
 		{
 			explosion.reset(bomb.x - 55,bomb.y);
-			explosion.animations.play('explodes',10,true);
+			//explosion.animations.play('explodes',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
+			this.CheckForPlayerDeath(explosion);
 		}
 		explosion = explosions.getFirstExists(false);
 		if(explosion)
 		{
 			explosion.reset(bomb.x - 110,bomb.y);
-			explosion.animations.play('explodes',10,true);
+			//explosion.animations.play('explodes',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
+			this.CheckForPlayerDeath(explosion);
 		}
 		//detonation gauche
 		explosion = explosions.getFirstExists(false);
 		if(explosion)
 		{
 			explosion.reset(bomb.x + 55,bomb.y);
-			explosion.animations.play('explodes',10,true);
+			//explosion.animations.play('explodes',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
+			this.CheckForPlayerDeath(explosion);
 		}
 		explosion = explosions.getFirstExists(false);
 		if(explosion)
 		{
 			explosion.reset(bomb.x + 110,bomb.y);
-			explosion.animations.play('explodes',10,true);
+			//explosion.animations.play('explodes',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
+			this.CheckForPlayerDeath(explosion);
 		}
 		//detonation haut
 		explosion = explosions.getFirstExists(false);
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y - 55);
-			explosion.animations.play('explodes',10,true);
+			//explosion.animations.play('explodes',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
+			this.CheckForPlayerDeath(explosion);
 		}
 		explosion = explosions.getFirstExists(false);
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y - 110);
-			explosion.animations.play('explodes',10,true);
+			//explosion.animations.play('explodes',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
+			this.CheckForPlayerDeath(explosion);
 		}		
 		//detonation bas
 		explosion = explosions.getFirstExists(false);
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y + 55);
-			explosion.animations.play('explodes',10,true);
+			//explosion.animations.play('explodes',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
+			this.CheckForPlayerDeath(explosion);
 		}
 		explosion = explosions.getFirstExists(false);
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y + 110);
-			explosion.animations.play('explodes',10,true);
+			//explosion.animations.play('explodes',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
+			this.CheckForPlayerDeath(explosion);
 		}
 		//on enlève la bombe
-		bombAs.remove(bomb);
+		bomb.kill();
 	},
 	EndExplodes: function (explosion) {
-		explosions.remove(explosion);
+		explosion.kill();
 	},
+	CheckForPlayerDeath : function(explosion)
+	{
+		var explodePlacementX = Math.abs(explosion.x - this.bomberA.x);
+		var explodePlacementY = Math.abs(explosion.y - this.bomberA.y);
+		console.log("diffX: " + explodePlacementX + " diffY: " + explodePlacementY);
+		if(explodePlacementX<45 && explodePlacementY<45)
+		{
+			console.log("le joueur A a perdu");
+		}
+		var explodePlacementX = Math.abs(explosion.x - this.bomberB.x);
+		var explodePlacementY = Math.abs(explosion.y - this.bomberB.y);
+		console.log("diffX: " + explodePlacementX + " diffY: " + explodePlacementY);
+		if(explodePlacementX<45 && explodePlacementY<45)
+		{
+			console.log("le joueur B a perdu");
+		}
+	}
 };
 
 // On ajoute les 2 fonctions "gameState.load" et "gameState.main" à notre objet Phaser
