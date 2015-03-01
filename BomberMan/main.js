@@ -33,7 +33,7 @@ gameState.load.prototype = {
 		//Chargement des bombes
 		game.load.image('bomb', 'img/Bomb.png');
 		//Chargement des explosions
-		game.load.spritesheet('fire', 'img/fire.png', 65,65);
+		game.load.spritesheet('explodes', 'img/fire.png', 64,64);
 	},
 
 	create: function() {
@@ -106,10 +106,12 @@ gameState.main.prototype = {
 		//explosions group
 		explosions = game.add.group();
 		explosions.physicBodyType=Phaser.Physics.ARCADE;
-    	explosions.createMultiple(30, 'fire');
+    	explosions.createMultiple(30, 'explodes');
 		explosions.setAll('anchor.x', 0.5);
     	explosions.setAll('anchor.y', 1);
-		explosions.setAll('animations.add','explodes');
+		explosions.forEach(function(item){
+			 item.animations.add("kaboom");
+		});
 	},
 
 	//Fonction exécutée en continu
@@ -215,7 +217,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y);
-			explosion.animations.play('explodes',10,true);
+			explosion.animations.play('kaboom',10,false);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -224,7 +226,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x - 55,bomb.y);
-			//explosion.animations.play('explodes',10,true);
+			explosion.animations.play('kaboom',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -232,7 +234,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x - 110,bomb.y);
-			//explosion.animations.play('explodes',10,true);
+			explosion.animations.play('kaboom',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -241,7 +243,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x + 55,bomb.y);
-			//explosion.animations.play('explodes',10,true);
+			explosion.animations.play('kaboom',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -249,7 +251,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x + 110,bomb.y);
-			//explosion.animations.play('explodes',10,true);
+			explosion.animations.play('kaboom',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -258,7 +260,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y - 55);
-			//explosion.animations.play('explodes',10,true);
+			explosion.animations.play('kaboom',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -266,7 +268,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y - 110);
-			//explosion.animations.play('explodes',10,true);
+			explosion.animations.play('kaboom',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}		
@@ -275,7 +277,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y + 55);
-			//explosion.animations.play('explodes',10,true);
+			explosion.animations.play('kaboom',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -283,7 +285,7 @@ gameState.main.prototype = {
 		if(explosion)
 		{
 			explosion.reset(bomb.x,bomb.y + 110);
-			//explosion.animations.play('explodes',10,true);
+			explosion.animations.play('kaboom',10,true);
 			game.time.events.add(500, this.EndExplodes, this, explosion);
 			this.CheckForPlayerDeath(explosion);
 		}
@@ -297,14 +299,12 @@ gameState.main.prototype = {
 	{
 		var explodePlacementX = Math.abs(explosion.x - this.bomberA.x);
 		var explodePlacementY = Math.abs(explosion.y - this.bomberA.y);
-		console.log("diffX: " + explodePlacementX + " diffY: " + explodePlacementY);
 		if(explodePlacementX<45 && explodePlacementY<45)
 		{
 			console.log("le joueur A a perdu");
 		}
 		var explodePlacementX = Math.abs(explosion.x - this.bomberB.x);
 		var explodePlacementY = Math.abs(explosion.y - this.bomberB.y);
-		console.log("diffX: " + explodePlacementX + " diffY: " + explodePlacementY);
 		if(explodePlacementX<45 && explodePlacementY<45)
 		{
 			console.log("le joueur B a perdu");
