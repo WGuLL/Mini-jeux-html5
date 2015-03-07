@@ -20,6 +20,8 @@ gameState.main = function() { };
 
 //Variable de jeu
 var fireRate = 0;
+var firingTimer =0;
+var livingEnemies = [];
 
 // Va contenir le code qui chargera les ressources ¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤¤ - LOAD
 gameState.load.prototype = {
@@ -34,6 +36,8 @@ gameState.load.prototype = {
 		//Chargement du tir
 		game.load.image('laser', 'img/laser.png');
 		game.load.image('enemylaser', 'img/enemyLaser.png');
+        //Chargement de l'explosion
+        game.load.spritesheet('kaboom', 'img/explosion.png', 256, 256);
 	},
 
 	create: function() {
@@ -68,6 +72,7 @@ gameState.main.prototype = {
     	game.physics.arcade.enable(this.ship);
     	this.ship.body.collideWorldBounds = true;
 
+        // ---- CONTROLS
     	//  And some controls to play the game with
     	cursors = game.input.keyboard.createCursorKeys();
     	fireButton = game.input.keyboard.addKey(Phaser.Keyboard.SPACEBAR);
@@ -92,12 +97,29 @@ gameState.main.prototype = {
     	enemyLasers.setAll('outOfBoundsKill', true);
     	enemyLasers.setAll('checkWorldBounds', true);
 
+        //  ---- EXPLOSIONS
+        explosions = game.add.group();
+        explosions.createMultiple(30, 'kaboom');
+        explosions.forEach(this.setupInvader, this);
+
     	// ---- ENEMIES
     	aliens = game.add.group();
     	aliens.enableBody = true;
     	aliens.physicsBodyType = Phaser.Physics.ARCADE;
-
     	this.createAliens();
+
+        // ---- LIVES
+        lives = game.add.group();
+        game.add.text(game.world.width - 250, 15, 'Lives :', { font: '34px Arial', fill: '#fff' });
+
+        for (var i = 0; i < 3; i++) 
+        {
+            var ship = lives.create(game.world.width - 120 + (45 * i), 30, 'ship');
+            ship.anchor.setTo(0.5, 0.5);
+            ship.scale.setTo(0.5,0.5);
+            ship.angle = 270;
+            ship.alpha = 1;
+        }
 	},
 
 
@@ -109,52 +131,111 @@ gameState.main.prototype = {
 
         //Vitesse nulle en attente de commande
         this.ship.body.velocity.setTo(0, 0);
+
+        // ---- COMMANDES
         //Fleche gauche
         if (cursors.left.isDown)
-        {
            	this.ship.body.velocity.x = -200;
-        }
         //Fleche droite
 	    else if (cursors.right.isDown)
-    	{
             this.ship.body.velocity.x = 200;
-        }
         else
-        {
        		this.ship.body.velocity.x = -80;
-        }
         //Fleche haute
         if (cursors.up.isDown)
-        {
            	this.ship.body.velocity.y = -200;
-        }
         //Fleche bas
 	    else if (cursors.down.isDown)
-    	{
             this.ship.body.velocity.y = 200;
-        }
-
-        //  Firing?
+        //  Ship Firing?
         if (fireButton.isDown)
-        {
 	        this.fireLaser();
-    	}
+        // Aliens firing !
+        if (game.time.now > firingTimer)
+            this.enemyFires();
+
+
+        // ---- COLLISIONS
+        //Lorsque qu'un tir touche un alien
+        game.physics.arcade.overlap(lasers, aliens, this.killAlien, null, this);
+        //Lorsque le vaisseau du joueur rentre dans un alien
+        game.physics.arcade.overlap(this.ship, aliens, this.kamikaze, null, this);
+        //Lorsqu'un alien touche le joueur
+        game.physics.arcade.overlap(enemyLasers, this.ship, this.enemyHitsPlayer, null, this);
 	},
 
 	//Fonction créant les aliens
 	createAliens: function () {
-	    for (var x = 0; x < 10; x++)
+	    for (var y = 0; y < 7; y++)
         {
-	        var alien = aliens.create(x * 100, 100, 'invader');
+	        var alien = aliens.create(500,y * 100, 'invader');
     	    alien.anchor.setTo(0.5, 0.5);
            	alien.body.moves = false;
     	   	alien.scale.setTo(0.5,0.5);
+            //Rotation des aliens en continu
+            game.add.tween(alien).to( { angle: 360 }, 2500, Phaser.Easing.Linear.None, true, 0, 1000, false);
         }
 
     	aliens.x = 100;
     	aliens.y = 50;
 	},
 
+    //Associe une explosion à chaque alien
+    setupInvader: function (invader) {
+
+        invader.anchor.x = 0.5;
+        invader.anchor.y = 0.5;
+        invader.animations.add('kaboom');
+
+    },
+
+    //Fonction tuant les aliens
+    killAlien: function (laser, alien) {
+        //Erase alien and bullet
+        alien.kill();
+        laser.kill();
+
+        //  And create an explosion
+        var explosion = explosions.getFirstExists(false);
+        explosion.scale.setTo(0.5, 0.5);
+        explosion.reset(alien.body.x + 30, alien.body.y + 30);
+        explosion.play('kaboom', 100, false, true);
+    },
+
+    //Fonction tuant les aliens et le joueur
+    kamikaze: function (ship, alien) {
+        alien.kill();
+        ship.kill();
+    },
+
+
+    enemyFires: function () {
+        //  Grab the first bullet we can from the pool
+        enemyLaser = enemyLasers.getFirstExists(false);
+
+        //On récupère le nombre d'ennemis vivants
+        livingEnemies.length=0;
+        aliens.forEachAlive(function(alien){
+            // put every living enemy in an array
+            livingEnemies.push(alien);
+        }); 
+
+        if (enemyLaser && livingEnemies.length > 0)
+        {
+        
+            var random=game.rnd.integerInRange(0,livingEnemies.length-1);
+
+            // randomly select one of them
+            var shooter=livingEnemies[random];
+            // And fire the bullet from this enemy
+            enemyLaser.reset(shooter.body.x + 30, shooter.body.y + 30);
+
+            game.physics.arcade.moveToObject(enemyLaser,this.ship,120);
+            firingTimer = game.time.now + 1000;
+        }
+    },
+
+    //Fonction de tir
     fireLaser: function () {
 
     	//  To avoid them being allowed to fire too fast we set a time limit
@@ -167,7 +248,7 @@ gameState.main.prototype = {
         	{
             	//  And fire it
             	laser.reset(this.ship.x +50, this.ship.y + 30);
-            	laser.body.velocity.x = 400;
+            	laser.body.velocity.x = 600;
             	fireRate = game.time.now + 400;
         	}
     	}
